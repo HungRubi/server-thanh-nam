@@ -85,15 +85,15 @@ class WidgetController {
     }
     
     /** [GET] /new/:id */
-    async editContent(req, res) {
+    async editWidget(req, res) {
         try{
-            const content = await Content.findById(req.params.id);
-            const contentFormat = {
-                    ...content.toObject(),
-                    lastUpdate: importDate(content.updatedAt)
+            const widget = await Widget.findById(req.params.id);
+            const widgetFormat = {
+                    ...widget.toObject(),
+                    lastUpdate: importDate(widget.updatedAt)
             }
             const data = {
-                content: contentFormat
+                content: widgetFormat
             }
             res.status(200).json({data})
         }
@@ -104,18 +104,12 @@ class WidgetController {
     }
 
     /** [PUT] /new/:id */
-    async updateContent(req, res) {
+    async updateWidget(req, res) {
         try{
-            const contentId = req.params.id;
-            const existingSlug = await Content.findOne({slug: req.body.slug});
-            if (existingSlug && existingSlug._id.toString() !== contentId) {
-                return res.status(400).json({
-                    message: "Slug đã tồn tại"
-                });
-            }
-            await Content.updateOne({_id: contentId}, req.body);
+            const widgettId = req.params.id;
+            await Widget.updateOne({_id: widgettId}, req.body);
             res.status(200).json({
-                message: "Cập nhật trang nội dung thành công :))"
+                message: "Cập nhật widget thành công :))"
             })
         }catch(error) {
             console.log(error);
@@ -126,12 +120,12 @@ class WidgetController {
     }
 
     /** [DELETE] /new/:id */
-    async deleteContent(req, res) {
+    async deleteWidget(req, res) {
         try{
-            const contentId = req.params.id;
-            await Content.deleteOne({_id: contentId});
+            const widgetId = req.params.id;
+            await Widget.deleteOne({_id: widgetId});
             res.status(200).json({
-                message: "Bạn vừa xóa 1 trang nội dung!"
+                message: "Bạn vừa xóa 1 widget!"
             })
         }catch(error) {
             console.log(error);

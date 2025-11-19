@@ -6,8 +6,13 @@ const widget = new Schema({
     link: { type: String },
     sapxep: { type: String },
     vitri: { type: String, default: 'Banner homepage' },
+    stt: {type: Number, default: 99999},
     image: { type: String  }, 
-    hienthi: { type: Boolean, default: true },
+    hienthi: { 
+        type: String, 
+        enum: ['Yes','No'],
+        default: 'Yes' 
+    },
     description: { type: String },
 }, { timestamps: true });
 

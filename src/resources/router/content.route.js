@@ -3,6 +3,7 @@ const route = express.Router();
 
 const contentController = require("../app/controller/content.controller");
 
+route.delete('/delete-many', contentController.deleteManyContent);
 route.delete('/:id', contentController.deleteContent);
 route.put('/:id', contentController.updateContent);
 route.get('/:id', contentController.editContent);

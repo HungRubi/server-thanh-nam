@@ -10,8 +10,10 @@ const globalRoute = require("./globalConfig.route");
 const authorRoute = require("./authorConfig.route");
 const socialRoute = require("./socialConfig.route");
 const seoRoute = require("./seoConfig.route");
+const menu = require("./menu.route");
 const contentConfigRoute = require("./contentConfig.route");
 function route(app) {
+    app.use("/menu", menu);
     app.use("/content-config", contentConfigRoute);
     app.use("/seo", seoRoute);
     app.use("/social", socialRoute);

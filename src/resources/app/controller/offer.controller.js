@@ -1,4 +1,5 @@
 const Offer = require('../model/offer.model');
+const Store = require("../model/store.model");
 const { importDate } = require('../../util/importDate');
 
 class offerController {
@@ -11,6 +12,7 @@ class offerController {
                 const offer = await Offer.find({
                     name: { $regex: searchQuery, $options: 'i' }
                 })
+                .populate("store")
                 .lean();
                 const offerFormat = offer.map(p => ({
                     ...p,
@@ -23,6 +25,7 @@ class offerController {
                 return res.status(200).json({data})
             }
             const offer = await Offer.find()
+                .populate("store")
                 .lean();
     
             const offerFormat = offer.map(p => ({
@@ -60,12 +63,29 @@ class offerController {
                 verified,
                 duyet,
             } = req.body;
-            const exitsOffer = await Offer.findOne({ code: req.body.code });
-            if(exitsOffer){
-                return  res.status(400).json({
-                    message: "Mã giảm giá đã tồn tại, vui lòng thử lại với mã khác !"
+            if(!name.trim()) {
+                return res.status(400).json({
+                    nameEmpty: "Tên offer không được bỏ trống"
                 })
             }
+            if(!offer.trim()) {
+                return res.status(400).json({
+                    OfferEmpty: "Vui lòng chọn cửa hàng"
+                })
+            }
+            if(!code.trim()) {
+                return res.status(400).json({
+                    codeEmpty: "Mã code không được bỏ trống"
+                })
+            }
+            const exitsOffer = await Offer.findOne({ code:code });
+            if(exitsOffer){
+                return  res.status(400).json({
+                    codeEmpty: "Mã giảm giá đã tồn tại, vui lòng thử lại với mã khác !"
+                })
+            }
+            const verified1 = verified?.trim() || "Yes";
+            const duyet1 = duyet?.trim() || "Yes";
             const newOffer = new Offer({
                 name,
                 offer,
@@ -73,11 +93,11 @@ class offerController {
                 url,
                 store,
                 description,
-                verified,
-                duyet,
+                verified1,
+                duyet1,
             });
             await newOffer.save();
-            res.status(200).json({ message: 'Thêm mã giảm giá thành công' });
+            res.status(200).json({ message: 'Thêm offer thành công' });
         }catch(error){
             console.log(error);
             return res.status(500).json({
@@ -90,12 +110,9 @@ class offerController {
     async editOffer(req, res) {
         try{
             const offer = await Offer.findById(req.params.id);
-            const offerFormat = {
-                    ...offer.toObject(),
-                    lastUpdate: importDate(offer.updatedAt)
-            }
+            
             const data = {
-                offer: offerFormat
+                offer
             }
             res.status(200).json({data})
         }
@@ -109,11 +126,26 @@ class offerController {
     async updateOffer(req, res) {
         try{
             const offerId = req.params.id;
-            const existingOffer = await Offer.findOne({code: req.body.code});
-            if (existingOffer && existingOffer._id.toString() !== offerId) {
+            if(!req.body.name.trim()) {
                 return res.status(400).json({
-                    message: "Code đã tồn tại"
-                });
+                    nameEmpty: "Tên offer không được bỏ trống"
+                })
+            }
+            if(!req.body.Offer.trim()) {
+                return res.status(400).json({
+                    OfferEmpty: "Vui lòng chọn cửa hàng"
+                })
+            }
+            if(!req.body.code.trim()) {
+                return res.status(400).json({
+                    codeEmpty: "Mã code không được bỏ trống"
+                })
+            }
+            const exitsOffer = await Offer.findOne({ code: req.body.code });
+            if(exitsOffer && exitsOffer._id.toString() !== offerId){
+                return  res.status(400).json({
+                    codeEmpty: "Mã giảm giá đã tồn tại, vui lòng thử lại với mã khác !"
+                })
             }
             await Offer.updateOne({_id: offerId}, req.body);
             res.status(200).json({
@@ -132,8 +164,17 @@ class offerController {
         try{
             const offerId = req.params.id;
             await Offer.deleteOne({_id: offerId});
+            const offer = await Offer.find()
+                .populate("store")
+                .lean();
+    
+            const offerFormat = offer.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }))
             res.status(200).json({
-                message: "Bạn vừa xóa 1 cửa hàng!"
+                message: "Bạn vừa xóa 1 offer!",
+                offerFormat
             })
         }catch(error) {
             console.log(error);
@@ -142,6 +183,82 @@ class offerController {
             })
         }
     }
+
+    /** [DELETE] /offer/delete-many */
+    async deleteManyOffer(req, res) {
+        try {
+            const ids  = req.body; 
+
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({
+                    message: "Danh sách ID không hợp lệ!"
+                });
+            }
+
+            await Offer.deleteMany({ _id: { $in: ids } });
+
+            const offer = await Offer
+            .find()
+            .populate('store')
+            .lean();
+            const offerFormat = offer.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }));
+
+            res.status(200).json({
+                offerFormat,
+                message: `Bạn vừa xóa ${ids.length} Offer!`
+            });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                message: "Lỗi server vui lòng thử lại sau :(("
+            });
+        }
+    }
+
+    /** [GET] /offer/filter?storeId=&duyetbai= */
+    async filterStore(req, res) {
+        try {
+            const { storeId, duyet } = req.query;
+
+            let filter = {};
+
+            if (storeId && storeId !== "tất cả") {
+                const idsToSearch = [storeId];
+                const queue = [storeId];
+
+                while (queue.length > 0) {
+                    const parentId = queue.shift();
+                    const children = await Store.find({ storeId: parentId }).select("_id");
+                    children.forEach(child => {
+                        idsToSearch.push(child._id.toString());
+                        queue.push(child._id.toString());
+                    });
+                }
+
+                filter.store = { $in: idsToSearch }; // đổi từ danhmuc -> store
+            }
+
+            if (duyet && duyet !== "tất cả") {
+                filter.duyet = duyet;
+            }
+
+            const offer = await Offer
+                .find(filter)
+                .populate("store")
+                .lean();
+
+            res.status(200).json({ offer });
+
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Lỗi server" });
+        }
+    }
+
 }
 
 module.exports = new offerController();

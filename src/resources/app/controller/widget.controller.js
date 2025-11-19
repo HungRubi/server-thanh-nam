@@ -47,7 +47,7 @@ class WidgetController {
         }
     }
     
-    /** [POST] /new */
+    /** [POST] /widget */
     async addWidget(req, res) {
         try {
             const {
@@ -59,14 +59,20 @@ class WidgetController {
                 hienthi,
                 description
             } = req.body;
-
+            if(!name.trim()) {
+                return res.status(400).json({
+                    nameErr: "Chưa nhập tên kìa bro"
+                })
+            }
+            const hienthi1 = hienthi.trim() || "Yes"
+            const vitri1 = vitri.trim() || "Banner homepage"
             const newWidget = new Widget({
                 name,
                 link,
                 sapxep,
-                vitri,
+                vitri1,
                 image,
-                hienthi,
+                hienthi1,
                 description
             });
 
@@ -84,7 +90,7 @@ class WidgetController {
         }
     }
     
-    /** [GET] /new/:id */
+    /** [GET] /widget/:id */
     async editWidget(req, res) {
         try{
             const widget = await Widget.findById(req.params.id);
@@ -103,10 +109,15 @@ class WidgetController {
         }
     }
 
-    /** [PUT] /new/:id */
+    /** [PUT] /widget/:id */
     async updateWidget(req, res) {
         try{
             const widgettId = req.params.id;
+            if(!req.body.name.trim()) {
+                return res.status(400).json({
+                    nameErr: 'Tên không được để trống!'
+                })
+            }
             await Widget.updateOne({_id: widgettId}, req.body);
             res.status(200).json({
                 message: "Cập nhật widget thành công :))"
@@ -119,12 +130,20 @@ class WidgetController {
         }
     }
 
-    /** [DELETE] /new/:id */
+    /** [DELETE] /widget/:id */
     async deleteWidget(req, res) {
         try{
             const widgetId = req.params.id;
             await Widget.deleteOne({_id: widgetId});
+            const widget = await Widget.find()
+                .lean();
+    
+            const widgetFormat = widget.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }))
             res.status(200).json({
+                widgetFormat,
                 message: "Bạn vừa xóa 1 widget!"
             })
         }catch(error) {
@@ -134,6 +153,40 @@ class WidgetController {
             })
         }
     }
+
+    /** [DELETE] /widget/delete-many */
+    async deleteManyWidget(req, res) {
+        try {
+            const ids  = req.body; 
+
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({
+                    message: "Danh sách ID không hợp lệ!"
+                });
+            }
+
+            await Widget.deleteMany({ _id: { $in: ids } });
+
+            const widget = await Widget.find().lean();
+            const widgetFormat = widget.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }));
+
+            res.status(200).json({
+                widgetFormat,
+                message: `Bạn vừa xóa ${ids.length} tin tức!`
+            });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                message: "Lỗi server vui lòng thử lại sau :(("
+            });
+        }
+    }
+
+    
 }
 
 module.exports = new WidgetController();

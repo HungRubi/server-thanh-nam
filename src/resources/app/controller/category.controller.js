@@ -61,7 +61,28 @@ class CategoryController {
                 metakeywords,
                 metadescription,
             } = req.body;
-
+            if(tendanhmuc === '') {
+                return res.status(400).json({
+                    tendanhmucErr: "Tên danh mục không được bỏ trống"
+                })
+            }
+            const exitsTenDanhMuc = await Category.findOne({tendanhmuc: tendanhmuc})
+            if(exitsTenDanhMuc) {
+                return res.status(400).json({
+                    tendanhmucErr: "Tên danh mục đã tồn tại"
+                })
+            }
+            if(slug === '') {
+                return res.status(400).json({
+                    slugErr: "slug không được bỏ trống"
+                })
+            }
+            const exitsSlug = await Category.findOne({slug: slug})
+            if(exitsSlug) {
+                return res.status(400).json({
+                    slugErr: "Slug đã tồn tại"
+                })
+            }
             const newCategory = new Category({
                 tendanhmuc,
                 slug,
@@ -76,7 +97,7 @@ class CategoryController {
             });
 
             await newCategory.save();
-            res.status(200).json({ message: 'Thêm danh mục thành công' });
+            return res.status(200).json({ message: 'Thêm danh mục thành công!' });
         }catch(error) {
             console.log(error);
             res.status(404).json({ message: error.message });
@@ -103,17 +124,36 @@ class CategoryController {
     
     /** [PUT] /category/:id */
     async updateCategory(req, res) {
-        try{
+        try {
             const categoryId = req.params.id;
-            await Category.updateOne({_id: categoryId}, req.body);
-            res.status(200).json({
-                message: "Cập nhật danh mục thành công :))"
-            })
-        }catch(error) {
+
+            if (!req.body.tendanhmuc?.trim()) {
+                return res.status(400).json({ tendanhmucErr: "Tên danh mục không được bỏ trống" });
+            }
+
+            const existsTenDanhMuc = await Category.findOne({ tendanhmuc: req.body.tendanhmuc });
+            if (existsTenDanhMuc && existsTenDanhMuc._id.toString() !== categoryId) {
+                return res.status(400).json({ tendanhmucErr: "Tên danh mục đã tồn tại" });
+            }
+
+            if (!req.body.slug?.trim()) {
+                return res.status(400).json({ slugErr: "Slug không được bỏ trống" });
+            }
+
+            const existsSlug = await Category.findOne({ slug: req.body.slug });
+            if (existsSlug && existsSlug._id.toString() !== categoryId) {
+                return res.status(400).json({ slugErr: "Slug đã tồn tại" });
+            }
+
+            await Category.updateOne({ _id: categoryId }, req.body);
+
+            return res.status(200).json({ message: "Cập nhật danh mục thành công!" });
+
+        } catch (error) {
             console.log(error);
-            res.status(404).json({
-                message: "Lỗi server vui lòng thử lại sau :(("
-            })
+            res.status(500).json({ 
+                message: "Lỗi server vui lòng thử lại sau :((" 
+            });
         }
     }
 
@@ -122,7 +162,13 @@ class CategoryController {
         try{
             const categoryId = req.params.id;
             await Category.deleteOne({_id: categoryId});
+            const category = await Category.find().lean();
+            const categoryFormat = category.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }))
             res.status(200).json({
+                categoryFormat,
                 message: "Bạn vừa xóa 1 danh mục!"
             })
         }catch(error) {
@@ -132,6 +178,39 @@ class CategoryController {
             })
         }
     }
+
+    /** [DELETE] /category/delete-many */
+    async deleteManyCategory(req, res) {
+        try {
+             const ids  = req.body;  // ✅ phải đúng key mà client gửi
+
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({
+                    message: "Danh sách ID không hợp lệ!"
+                });
+            }
+
+            await Category.deleteMany({ _id: { $in: ids } });
+
+            const category = await Category.find().lean();
+            const categoryFormat = category.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }));
+
+            res.status(200).json({
+                categoryFormat,
+                message: `Bạn vừa xóa ${ids.length} danh mục!`
+            });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                message: "Lỗi server vui lòng thử lại sau :(("
+            });
+        }
+    }
+
 }
 
 module.exports = new CategoryController();

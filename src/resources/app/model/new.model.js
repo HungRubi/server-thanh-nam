@@ -4,9 +4,17 @@ const Schema = mongoose.Schema;
 const news = new Schema({
     name: {type: String, required: true},
     slug: {type: String, required: true, unique: true},
-    category: {type: mongoose.Schema.Types.ObjectId, ref: 'category', required: true},
+    category: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'category', 
+        required: true
+    },
     image: {type: String},
-    duyet: {type: Boolean, default: true},
+    duyet: { 
+        type: String, 
+        enum: ['Yes','No'],
+        default: 'Yes'  
+    },
     description: {type: String},
     content: {type: String},
     metatitle: { type: String },

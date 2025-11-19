@@ -64,21 +64,33 @@ class DealController {
                 metadescription,
                 metakeywords
             } = req.body;
+            if(!name.trim()) {
+                return res.status(400).json({
+                    nameErr: "Quên nhập tên kìa bro!"
+                })
+            }
+            if(!slug.trim()) {
+                return res.status(400).json({
+                    slugErr: "Slug không được bỏ trống"
+                })
+            }
             const existingSlug = await Deal.findOne({slug: req.body.slug});
             if(existingSlug) {
                 return res.status(400).json({
-                    message: "Slug đã tồn tại"
+                    slugErr: "Slug đã tồn tại"
                 })
             }
+            const duyet1 = duyet.trim() || "Yes"
+            const danhmuc1 = danhmuc.trim() || "Deals"
             const newDeal = new Deal({
                 name,
                 slug,
-                danhmuc,
+                danhmuc1,
                 originalPrice,
                 price,
                 url,
                 image,
-                duyet,
+                duyet1,
                 description,
                 metatitle,
                 metadescription,
@@ -105,7 +117,7 @@ class DealController {
                 lastUpdate: importDate(deal.updatedAt)
             }
             const data = {
-                store: dealFormat
+                deal: dealFormat
             }
             res.status(200).json({data})
         }
@@ -119,15 +131,26 @@ class DealController {
     async updateDeal(req, res) {
         try{
             const dealId = req.params.id;
-            const existingDeal = await Deal.findOne({slug: req.body.slug});
-            if (existingDeal && existingDeal._id.toString() !== dealId) {
+            console.log(req.body)
+            if(!req.body.name.trim()) {
                 return res.status(400).json({
-                    message: "Slug đã tồn tại"
-                });
+                    nameErr: "Quên nhập tên kìa bro!"
+                })
+            }
+            if(!req.body.slug.trim()) {
+                return res.status(400).json({
+                    slugErr: "Slug không được bỏ trống"
+                })
+            }
+            const existingSlug = await Deal.findOne({slug: req.body.slug});
+            if(existingSlug && existingSlug._id.toString() !== dealId) {
+                return res.status(400).json({
+                    slugErr: "Slug đã tồn tại"
+                })
             }
             await Deal.updateOne({_id: dealId}, req.body);
             res.status(200).json({
-                message: "Cập nhật cửa hàng thành công :))"
+                message: "Cập nhật deal thành công"
             })
         }catch(error) {
             console.log(error);
@@ -142,8 +165,16 @@ class DealController {
         try{
             const dealId = req.params.id;
             await Deal.deleteOne({_id: dealId});
+            const deal = await Deal.find()
+                .lean();
+    
+            const dealFormat = deal.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }))
             res.status(200).json({
-                message: "Bạn vừa xóa 1 cửa hàng!"
+                message: "Bạn vừa xóa 1 cửa hàng!",
+                deal: dealFormat
             })
         }catch(error) {
             console.log(error);
@@ -152,6 +183,70 @@ class DealController {
             })
         }
     }
+
+    /** [DELETE] /deal/delete-many */
+    async deleteManyDeal(req, res) {
+        try {
+            const ids  = req.body; 
+
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({
+                    message: "Danh sách ID không hợp lệ!"
+                });
+            }
+
+            await Deal.deleteMany({ _id: { $in: ids } });
+
+            const deal = await Deal
+            .find()
+            .lean();
+            const dealFormat = deal.map(p => ({
+                ...p,
+                formatDate: importDate(p.createdAt)
+            }));
+
+            res.status(200).json({
+                dealFormat,
+                message: `Bạn vừa xóa ${ids.length} deal!`
+            });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                message: "Lỗi server vui lòng thử lại sau :(("
+            });
+        }
+    }
+
+    /** [GET] /deal/filter */
+    async filterDeal(req, res) {
+        try {
+            const { danhmuc, duyet } = req.query;
+            console.log(danhmuc);
+            console.log(duyet);
+
+            let filter = {};
+
+            if (danhmuc && danhmuc !== "tất cả") {
+                filter.danhmuc = danhmuc;
+            }
+
+            if (duyet && duyet !== "tất cả") {
+                filter.duyet = duyet;
+            }
+
+            const deals = await Deal
+                .find(filter)
+                .lean();
+
+            return res.status(200).json({ deals });
+
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Lỗi server" });
+        }
+    }
+
 }
 
 module.exports = new DealController();

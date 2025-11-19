@@ -5,7 +5,11 @@ const content = new Schema({
     name: {type: String, required: true},
     slug: {type: String, required: true, unique: true},
     image: {type: String},
-    duyet: {type: Boolean, default: true},
+    duyet: { 
+        type: String, 
+        enum: ['Yes','No'],
+        default: 'Yes'  
+    },
     description: {type: String},
     metatitle: { type: String },
     metadescription: { type: String },

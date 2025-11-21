@@ -3,8 +3,7 @@ const route = express.Router();
 
 const authorController = require("../app/controller/authorConfig.controller");
 
-route.get('/:id', authorController.editAuthor);
-route.put('/:id', authorController.updateAuthor);
-route.post('/', authorController.addAuthor);
+route.get('/', authorController.editAuthor);
+route.put('/', authorController.updateAuthor);
 
 module.exports = route;

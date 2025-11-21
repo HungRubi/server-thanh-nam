@@ -5,7 +5,11 @@ const globalConfig = new Schema({
     name: {type: String, default: "Thành Nam Store"},
     logo: {type: String},
     favicon: {type: String},
-    blockIndex: {type: Boolean, default: false},
+    blockIndex: {
+        type: String, 
+        enum: ['Yes','No'],
+        default: 'No'
+    },
     slogan: {type: String, default: "Uy tín tạo niềm tin"},
     notifi1: {type: String},
     notifi2: {type: String},

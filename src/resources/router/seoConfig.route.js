@@ -3,8 +3,7 @@ const route = express.Router();
 
 const seoConfigController = require("../app/controller/seoConfig.controller");
 
-route.get('/:id', seoConfigController.editSeo);
-route.put('/:id', seoConfigController.updateSeo);
-route.post('/', seoConfigController.addSeo);
+route.get('/', seoConfigController.editSeo);
+route.put('/', seoConfigController.updateSeo);
 
 module.exports = route;

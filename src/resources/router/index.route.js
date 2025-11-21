@@ -1,4 +1,5 @@
 const userRoute = require("./user.route");
+const authenticationRoute = require("./authentication.route");
 const categoryRoute = require("./category.route");      
 const storeRoute = require("./store.route");
 const offerRoute = require("./offer.route");
@@ -12,7 +13,10 @@ const socialRoute = require("./socialConfig.route");
 const seoRoute = require("./seoConfig.route");
 const menu = require("./menu.route");
 const contentConfigRoute = require("./contentConfig.route");
+const fileRoute = require("./file.route");
 function route(app) {
+    app.use("/auth", authenticationRoute);
+    app.use("/file", fileRoute);
     app.use("/menu", menu);
     app.use("/content-config", contentConfigRoute);
     app.use("/seo", seoRoute);

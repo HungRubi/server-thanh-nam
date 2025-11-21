@@ -3,8 +3,7 @@ const route = express.Router();
 
 const globalController = require("../app/controller/globalConfig.controller");
 
-route.get('/:id', globalController.editGlobal);
-route.put('/:id', globalController.updateGlobal);
-route.post('/', globalController.addGlobal);
+route.put('/', globalController.updateGlobalConfig);
+route.get('/', globalController.getGlobalConfig);
 
 module.exports = route;

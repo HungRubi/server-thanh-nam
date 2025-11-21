@@ -3,8 +3,7 @@ const route = express.Router();
 
 const socialController = require("../app/controller/socialConfig.controller");
 
-route.get('/:id', socialController.editSocial);
-route.put('/:id', socialController.updateSocial);
-route.post('/', socialController.addSocial);
+route.get('/', socialController.editSocial);
+route.put('/', socialController.updateSocial);
 
 module.exports = route;

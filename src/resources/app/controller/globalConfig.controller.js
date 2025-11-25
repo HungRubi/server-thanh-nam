@@ -1,6 +1,8 @@
 const GlobalConfig = require("../model/globalConfig.model");
 const {importDate} = require("../../util/importDate");
 class GlobalConfigController {
+
+    /** [GET] /global */
     async getGlobalConfig(req, res) {
         try {
             let global = await GlobalConfig.findOne();
@@ -22,7 +24,7 @@ class GlobalConfigController {
         }
     }
 
-
+    /** [PUT] /global */
     async updateGlobalConfig(req, res) {
         try {
             const updatedGlobal = await GlobalConfig.findOneAndUpdate(

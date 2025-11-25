@@ -129,15 +129,28 @@ class storeController {
     /** [GET] /store/:id */
     async editStore(req, res) {
         try{
-            const store = await Store.findById(req.params.id);
-            const storeFormat = {
-                    ...store.toObject(),
-                    lastUpdate: importDate(store.updatedAt)
+            if(req.params.id) {
+                if(!req.params.id) {
+                    return res.status(400).json({
+                        message: "Không có store này"
+                    })
+                }
+                const store = await Store.findById(req.params.id);
+                if(!store) {
+                    return res.status(400).json({
+                        message: "Không có store này"
+                    })
+                }
+                const storeFormat = {
+                        ...store.toObject(),
+                        lastUpdate: importDate(store.updatedAt)
+                }
+                const data = {
+                    store: storeFormat
+                }
+                return res.status(200).json({data})
             }
-            const data = {
-                store: storeFormat
-            }
-            res.status(200).json({data})
+            const store = Store.find({slug: req.params.slug})
         }
         catch(err){
             console.log(err);

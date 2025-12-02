@@ -14,7 +14,9 @@ const seoRoute = require("./seoConfig.route");
 const menu = require("./menu.route");
 const contentConfigRoute = require("./contentConfig.route");
 const fileRoute = require("./file.route");
+const eventRoute = require("./event.route");
 function route(app) {
+    app.use("/event", eventRoute);
     app.use("/auth", authenticationRoute);
     app.use("/file", fileRoute);
     app.use("/menu", menu);

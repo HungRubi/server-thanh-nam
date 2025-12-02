@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const offer = new Schema({
     name: { type: String, required: true },
     offer: { type: String, default:'5' },
-    code: { type: String, required: true, unique: true },
+    code: { type: String },
     url: { type: String },
     store: {type: mongoose.Schema.Types.ObjectId, ref: 'store', required: true},
     description: { type: String  }, 

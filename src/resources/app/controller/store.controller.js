@@ -1,4 +1,5 @@
 const Store = require('../model/store.model');
+const Offer = require("../model/offer.model");
 const Category = require("../model/category.model");
 const { importDate } = require('../../util/importDate');
 const mongoose = require("mongoose")
@@ -145,12 +146,13 @@ class storeController {
                         ...store.toObject(),
                         lastUpdate: importDate(store.updatedAt)
                 }
+                const offers = await Offer.find({store: req.params.id}).lean();
                 const data = {
+                    offers,
                     store: storeFormat
                 }
                 return res.status(200).json({data})
             }
-            const store = Store.find({slug: req.params.slug})
         }
         catch(err){
             console.log(err);

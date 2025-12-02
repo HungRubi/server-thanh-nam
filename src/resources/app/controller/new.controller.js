@@ -82,16 +82,15 @@ class NewController {
                     slugErr: "Slug đã tồn tại"
                 })
             }
-            if(!category.trim()) {
-                return res.status(400).json({
-                    categoryErr: "Vui lòng chọn danh mục"
-                })
+            let categoryValue = category;
+            if (!category || category.trim() === "") {
+                categoryValue = null;
             }
             const duyet1 = duyet.trim() || "Yes"
             const newNews = new News({
                 name,
                 slug,
-                category,
+                category: categoryValue,
                 image,
                 duyet1,
                 description,
@@ -156,10 +155,8 @@ class NewController {
                 });
             }
 
-            if(!req.body.category.trim()) {
-                return res.status(400).json({
-                    categoryErr: "Vui lòng chọn danh mục"
-                });
+            if (!req.body.category || req.body.category.trim() === "") {
+                delete req.body.category;
             }
 
             await News.updateOne({ _id: newId }, req.body);

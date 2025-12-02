@@ -78,12 +78,6 @@ class offerController {
                     codeEmpty: "Mã code không được bỏ trống"
                 })
             }
-            const exitsOffer = await Offer.findOne({ code:code });
-            if(exitsOffer){
-                return  res.status(400).json({
-                    codeEmpty: "Mã giảm giá đã tồn tại, vui lòng thử lại với mã khác !"
-                })
-            }
             const verified1 = verified?.trim() || "Yes";
             const duyet1 = duyet?.trim() || "Yes";
             const newOffer = new Offer({

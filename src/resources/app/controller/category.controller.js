@@ -1,4 +1,5 @@
 const Category = require('../model/category.model');
+const Store = require("../model/store.model");
 const { importDate } = require('../../util/importDate');
 class CategoryController {
 
@@ -114,8 +115,12 @@ class CategoryController {
                     ...category.toObject(),
                     lastUpdate: importDate(category.updatedAt)
             }
+            const stores = await Store.find({danhmuc: req.params.id})
+            .sort({createdAt: -1})
+            .lean();
             const data = {
-                category: formatCategory
+                category: formatCategory,
+                stores
             }
             res.status(200).json({data})
         }
@@ -123,6 +128,40 @@ class CategoryController {
             res.status(500).json({message: err})
         }
     }
+
+    async slug(req, res) {
+        try {
+            // Lấy slug từ URL
+            const { slug } = req.params;
+
+            // Tìm category theo slug
+            const category = await Category.findOne({ slug });
+            if (!category) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+
+            // Format lại category
+            const formatCategory = {
+                ...category.toObject(),
+                lastUpdate: importDate(category.updatedAt)
+            };
+
+            // Tìm store theo slug category (nếu stores lưu ID, giữ nguyên find({ danhmuc: category._id }))
+            const stores = await Store.find({ danhmuc: category._id })
+                .sort({ createdAt: -1 })
+                .lean();
+
+            const data = {
+                category: formatCategory,
+                stores
+            };
+
+            res.status(200).json({ data });
+        } catch (err) {
+            res.status(500).json({ message: err.message || err });
+        }
+    }
+
     
     /** [PUT] /category/:id */
     async updateCategory(req, res) {

@@ -13,6 +13,7 @@ class offerController {
                     name: { $regex: searchQuery, $options: 'i' }
                 })
                 .populate("store")
+                .sort({createdAt: -1})
                 .lean();
                 const offerFormat = offer.map(p => ({
                     ...p,
@@ -26,6 +27,7 @@ class offerController {
             }
             const offer = await Offer.find()
                 .populate("store")
+                .sort({createdAt: -1})
                 .lean();
     
             const offerFormat = offer.map(p => ({
@@ -70,7 +72,12 @@ class offerController {
             }
             if(!offer.trim()) {
                 return res.status(400).json({
-                    OfferEmpty: "Vui lòng chọn cửa hàng"
+                    OfferEmpty: "Vui lòng nhập mức giảm giá"
+                })
+            }
+            if(!store.trim() || store === "") {
+                return res.status(400).json({
+                    storeErr: "Vui lòng chọn cửa hàng"
                 })
             }
             if(!code.trim()) {
@@ -139,6 +146,11 @@ class offerController {
             if(exitsOffer && exitsOffer._id.toString() !== offerId){
                 return  res.status(400).json({
                     codeEmpty: "Mã giảm giá đã tồn tại, vui lòng thử lại với mã khác !"
+                })
+            }
+            if(!req.body.store.trim() || req.body.store === "") {
+                return res.status(400).json({
+                    storeErr: "Vui lòng chọn cửa hàng"
                 })
             }
             await Offer.updateOne({_id: offerId}, req.body);

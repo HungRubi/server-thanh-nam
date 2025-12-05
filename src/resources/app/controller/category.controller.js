@@ -10,6 +10,7 @@ class CategoryController {
                 const category = await Category.find({
                     tendanhmuc: { $regex: searchQuery, $options: 'i' }
                 })
+                .sort({createdAt: -1})
                 .lean();
                 const categoryFormat = category.map(p => ({
                     ...p,
@@ -22,6 +23,7 @@ class CategoryController {
                 return res.status(200).json({data})
             }
             const categories = await Category.find()
+                .sort({createdAt: -1})
                 .lean();
     
             const categoryFormat = categories.map(p => ({

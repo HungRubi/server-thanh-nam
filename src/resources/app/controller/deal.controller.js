@@ -11,6 +11,7 @@ class DealController {
                 const deal = await Deal.find({
                     name: { $regex: searchQuery, $options: 'i' }
                 })
+                .sort({createdAt: -1})
                 .lean();
                 const dealFormat = deal.map(p => ({
                     ...p,
@@ -23,6 +24,7 @@ class DealController {
                 return res.status(200).json({data})
             }
             const deal = await Deal.find()
+                .sort({createdAt: -1})
                 .lean();
     
             const dealFormat = deal.map(p => ({

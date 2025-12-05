@@ -10,10 +10,12 @@ class storeController {
         try{
             const searchQuery = req.query.timkiem?.trim() || '';
             if(searchQuery){
+                console.log(searchQuery)
                 const store = await Store.find({
                     tenstore: { $regex: searchQuery, $options: 'i' }
                 })
                 .populate('danhmuc')
+                .sort({createdAt: -1})
                 .lean();
                 const storeFormat = store.map(p => ({
                     ...p,
@@ -27,6 +29,7 @@ class storeController {
             }
             const stores = await Store.find()
                 .populate('danhmuc')
+                .sort({createdAt: -1})
                 .lean();
     
             const storeFormat = stores.map(p => ({

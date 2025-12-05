@@ -11,6 +11,7 @@ class WidgetController {
                 const widget = await Widget.find({
                     name: { $regex: searchQuery, $options: 'i' }
                 })
+                .sort({createdAt: -1})
                 .lean();
                 const widgetFormat = widget.map(p => ({
                     ...p,
@@ -23,6 +24,7 @@ class WidgetController {
                 return res.status(200).json({data})
             }
             const widget = await Widget.find()
+                .sort({createdAt: -1})
                 .lean();
     
             const widgetFormat = widget.map(p => ({

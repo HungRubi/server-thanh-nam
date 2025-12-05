@@ -10,6 +10,7 @@ class EventController {
                 const event = await Event.find({
                     tendanhmuc: { $regex: searchQuery, $options: 'i' }
                 })
+                .sort({createdAt: -1})
                 .lean();
                 const eventFormat = event.map(p => ({
                     ...p,
@@ -22,6 +23,7 @@ class EventController {
                 return res.status(200).json({data})
             }
             const categories = await Event.find()
+                .sort({createdAt: -1})
                 .lean();
     
             const eventFormat = categories.map(p => ({

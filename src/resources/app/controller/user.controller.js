@@ -11,6 +11,7 @@ class userController {
                 const user = await User.find({
                     hovaten: { $regex: searchQuery, $options: 'i' }
                 })
+                .sort({createdAt: -1})
                 .lean();
                 const userFormat = user.map(p => ({
                     ...p,
@@ -23,6 +24,7 @@ class userController {
                 return res.status(200).json({data})
             }
             const users = await User.find()
+                .sort({createdAt: -1})
                 .lean();
     
             const userFormat = users.map(p => ({

@@ -2,7 +2,6 @@ const Menu = require("../model/menu.model");
 const { importDate } = require("../../util/importDate");
 const mongoose = require("mongoose");
 
-/** Đệ quy lấy danh sách tất cả menu con */
 const findChildren = async (parentId) => {
     const children = await Menu.find({ danhmuccha: parentId }).lean();
 
@@ -33,6 +32,7 @@ class MenuController {
                     { path: "category" },
                     { path: "page" },
                 ])
+                .sort({createdAt: -1})
                 .lean();
 
                 return res.status(200).json({
@@ -52,6 +52,7 @@ class MenuController {
                     { path: "category" },
                     { path: "page" },
                 ])
+                .sort({createdAt: -1})
                 .lean();
 
             return res.status(200).json({

@@ -11,6 +11,7 @@ class ContentController {
                 const content = await Content.find({
                     name: { $regex: searchQuery, $options: 'i' }
                 })
+                .sort({createdAt: -1})
                 .lean();
                 const contentFormat = content.map(p => ({
                     ...p,
@@ -23,6 +24,7 @@ class ContentController {
                 return res.status(200).json({data})
             }
             const content = await Content.find()
+                .sort({createdAt: -1})
                 .lean();
     
             const contentFormat = content.map(p => ({

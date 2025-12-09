@@ -13,6 +13,7 @@ class NewController {
                     name: { $regex: searchQuery, $options: 'i' }
                 })
                 .populate("category")
+                .sort({createdAt: -1})
                 .lean();
                 const newFormat = news.map(p => ({
                     ...p,
@@ -27,6 +28,7 @@ class NewController {
             const news = await News
             .find()
             .populate("category")
+            .sort({createdAt: -1})
             .lean();
     
             const newFormat = news.map(p => ({

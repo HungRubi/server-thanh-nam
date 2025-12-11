@@ -8,6 +8,7 @@ route.delete("/delete-many", storeController.deleteManyStore);
 route.delete("/:id", storeController.deleteStore);
 route.put("/:id", storeController.updateStore);
 route.get("/filter", storeController.filterStore);
+route.get("/slug/:slug", storeController.getBySlug);
 route.get("/:id", storeController.editStore);
 route.get("/", storeController.index);
 

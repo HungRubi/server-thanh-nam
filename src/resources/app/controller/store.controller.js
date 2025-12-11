@@ -299,6 +299,38 @@ class storeController {
         }
     }
 
+    /** [GET] /store/slug/:slug */
+    async getBySlug(req, res) {
+        try {
+            const { slug } = req.params;
+            if (!slug) {
+                return res.status(400).json({ message: "Không có store này" });
+            }
+
+            const store = await Store.findOne({ slug }).populate('danhmuc').lean();
+            if (!store) {
+                return res.status(400).json({ message: "Không có store này" });
+            }
+
+            const offers = await Offer.find({ store: store._id }).lean();
+
+            const storeFormat = {
+                ...store,
+                lastUpdate: importDate(store.updatedAt || store.createdAt)
+            };
+
+            const data = {
+                offers,
+                store: storeFormat
+            };
+
+            return res.status(200).json({ data });
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({ message: err });
+        }
+    }
+
 }
 
 module.exports = new storeController();
